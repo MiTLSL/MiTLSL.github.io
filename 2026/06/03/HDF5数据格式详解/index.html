@@ -1,0 +1,457 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>HDF5数据格式详解 | Mitlsl</title><meta name="keywords" content="Embodied AI,HDF5,Robot Learning"><meta name="author" content="Mitlsl"><meta name="copyright" content="Mitlsl"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="HDF5 数据格式详解：机器人学习里的示教数据容器在机器人模仿学习、离线强化学习和科学计算中，经常会遇到 .hdf5 或 .h5 文件。它看起来只是一个文件，但里面可以同时保存轨迹、图像、动作、奖励、环境参数和各种元数据。 如果一句话概括：  HDF5 是一种适合保存大规模数组和层级结构数据的文件格式，可以把它理解成一个单文件版的小型文件系统。  对于 robomimic、Diffusion Po">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HDF5数据格式详解">
+<meta property="og:url" content="http://example.com/2026/06/03/HDF5%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Mitlsl">
+<meta property="og:description" content="HDF5 数据格式详解：机器人学习里的示教数据容器在机器人模仿学习、离线强化学习和科学计算中，经常会遇到 .hdf5 或 .h5 文件。它看起来只是一个文件，但里面可以同时保存轨迹、图像、动作、奖励、环境参数和各种元数据。 如果一句话概括：  HDF5 是一种适合保存大规模数组和层级结构数据的文件格式，可以把它理解成一个单文件版的小型文件系统。  对于 robomimic、Diffusion Po">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
+<meta property="article:published_time" content="2026-06-03T07:34:59.000Z">
+<meta property="article:modified_time" content="2026-06-03T07:40:27.020Z">
+<meta property="article:author" content="Mitlsl">
+<meta property="article:tag" content="Embodied AI">
+<meta property="article:tag" content="HDF5">
+<meta property="article:tag" content="Robot Learning">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><link rel="shortcut icon" href="/img/favicon_1.ico"><link rel="canonical" href="http://example.com/2026/06/03/HDF5%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E8%AF%A6%E8%A7%A3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery@2/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'HDF5数据格式详解',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2026-06-03 15:40:27'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 5.4.2"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/deadpool.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data is-center"><div class="data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a></div><div class="data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a></div><div class="data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">Mitlsl</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">HDF5数据格式详解</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-03T07:34:59.000Z" title="发表于 2026-06-03 15:34:59">2026-06-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-03T07:40:27.020Z" title="更新于 2026-06-03 15:40:27">2026-06-03</time></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="HDF5数据格式详解"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="HDF5-数据格式详解：机器人学习里的示教数据容器"><a href="#HDF5-数据格式详解：机器人学习里的示教数据容器" class="headerlink" title="HDF5 数据格式详解：机器人学习里的示教数据容器"></a>HDF5 数据格式详解：机器人学习里的示教数据容器</h1><p>在机器人模仿学习、离线强化学习和科学计算中，经常会遇到 <code>.hdf5</code> 或 <code>.h5</code> 文件。它看起来只是一个文件，但里面可以同时保存轨迹、图像、动作、奖励、环境参数和各种元数据。</p>
+<p>如果一句话概括：</p>
+<blockquote>
+<p>HDF5 是一种适合保存大规模数组和层级结构数据的文件格式，可以把它理解成一个单文件版的小型文件系统。</p>
+</blockquote>
+<p>对于 robomimic、Diffusion Policy、ACT 等机器人学习框架来说，HDF5 经常扮演“离线示教数据仓库”的角色。训练时，模型并不会直接和真实机器人交互，而是不断从 HDF5 文件里采样观测和动作，学习专家策略。</p>
+<h2 id="1-HDF5-是什么"><a href="#1-HDF5-是什么" class="headerlink" title="1. HDF5 是什么"></a>1. HDF5 是什么</h2><p>HDF5 的全称是 <strong>Hierarchical Data Format version 5</strong>。它不是某一种算法，也不是某一个深度学习框架，而是一种通用的数据存储格式，特别适合保存大规模、多维数组和有层级关系的数据。</p>
+<p>HDF5 文件内部最常见的三个概念是：</p>
+<table>
+<thead>
+<tr>
+<th>概念</th>
+<th>可以类比成</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Group</td>
+<td>文件夹</td>
+<td>组织层级结构，例如 <code>data/demo_0/obs</code></td>
+</tr>
+<tr>
+<td>Dataset</td>
+<td>数组文件</td>
+<td>保存真正的数据，例如动作、图像、状态</td>
+</tr>
+<tr>
+<td>Attribute</td>
+<td>元数据</td>
+<td>保存环境名称、轨迹长度、采样频率等小型信息</td>
+</tr>
+</tbody></table>
+<p>一个机器人示教数据集可能长这样：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">demo_dataset.hdf5</span><br><span class="line">└── data</span><br><span class="line">    ├── demo_0</span><br><span class="line">    │   ├── actions</span><br><span class="line">    │   ├── rewards</span><br><span class="line">    │   ├── dones</span><br><span class="line">    │   ├── obs</span><br><span class="line">    │   │   ├── robot0_eef_pos</span><br><span class="line">    │   │   ├── robot0_eef_quat</span><br><span class="line">    │   │   ├── robot0_gripper_qpos</span><br><span class="line">    │   │   └── agentview_image</span><br><span class="line">    │   └── next_obs</span><br><span class="line">    │       ├── robot0_eef_pos</span><br><span class="line">    │       ├── robot0_eef_quat</span><br><span class="line">    │       ├── robot0_gripper_qpos</span><br><span class="line">    │       └── agentview_image</span><br><span class="line">    ├── demo_1</span><br><span class="line">    └── demo_2</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>demo_0</code>、<code>demo_1</code>、<code>demo_2</code> 就是一条条示教轨迹。每条轨迹内部又保存了动作、奖励、终止标记、当前观测和下一时刻观测。</p>
+<h2 id="2-为什么机器人学习喜欢用-HDF5"><a href="#2-为什么机器人学习喜欢用-HDF5" class="headerlink" title="2. 为什么机器人学习喜欢用 HDF5"></a>2. 为什么机器人学习喜欢用 HDF5</h2><p>机器人数据有几个非常典型的特点：</p>
+<ul>
+<li><strong>数据量大</strong>：一条轨迹可能有几十到几千个时间步，一个数据集可能包含几百到几百万步。</li>
+<li><strong>模态复杂</strong>：同一时刻可能有机器人关节、末端位姿、夹爪状态、物体状态、相机图像、语言指令等信息。</li>
+<li><strong>天然是数组</strong>：动作通常是 <code>[T, action_dim]</code>，图像通常是 <code>[T, H, W, C]</code>，状态通常是 <code>[T, state_dim]</code>。</li>
+<li><strong>训练需要随机读取</strong>：DataLoader 经常随机采样某条轨迹、某个时间步，或者某段连续序列。</li>
+</ul>
+<p>HDF5 正好适合这种场景：</p>
+<ul>
+<li>可以把大量数组放进一个文件，避免成千上万个小文件拖慢读取。</li>
+<li>支持类似文件夹的层级结构，很适合保存 <code>demo_i/obs/actions</code> 这样的轨迹数据。</li>
+<li>支持切片读取，不需要一次性把整个数据集加载进内存。</li>
+<li>支持压缩，图像数据可以显著节省磁盘空间。</li>
+<li>可以保存属性和元数据，方便记录实验环境与数据集信息。</li>
+<li>Python 生态成熟，常用 <code>h5py</code> 读取，读出来基本就是 Numpy 数组。</li>
+</ul>
+<h2 id="3-典型-robomimic-数据集结构"><a href="#3-典型-robomimic-数据集结构" class="headerlink" title="3. 典型 robomimic 数据集结构"></a>3. 典型 robomimic 数据集结构</h2><p>robomimic 风格的数据集通常围绕 <code>data/demo_x</code> 组织。一个 <code>demo_x</code> 就是一条完整轨迹，常见字段如下：</p>
+<table>
+<thead>
+<tr>
+<th>字段</th>
+<th>常见形状</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>actions</code></td>
+<td><code>[T, action_dim]</code></td>
+<td>专家动作，也就是训练时要模仿的标签</td>
+</tr>
+<tr>
+<td><code>rewards</code></td>
+<td><code>[T]</code></td>
+<td>每个时间步的奖励</td>
+</tr>
+<tr>
+<td><code>dones</code></td>
+<td><code>[T]</code></td>
+<td>当前 transition 是否结束</td>
+</tr>
+<tr>
+<td><code>states</code></td>
+<td><code>[T, ...]</code></td>
+<td>仿真器内部状态，常用于回放或复现</td>
+</tr>
+<tr>
+<td><code>obs</code></td>
+<td>group</td>
+<td>当前时刻观测，里面包含多个 observation key</td>
+</tr>
+<tr>
+<td><code>next_obs</code></td>
+<td>group</td>
+<td>执行动作后的下一时刻观测</td>
+</tr>
+<tr>
+<td><code>attrs</code></td>
+<td>attribute</td>
+<td>环境名称、环境参数、轨迹长度等元数据</td>
+</tr>
+</tbody></table>
+<p>低维观测可能包括：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">robot0_eef_pos</span><br><span class="line">robot0_eef_quat</span><br><span class="line">robot0_gripper_qpos</span><br><span class="line">object</span><br></pre></td></tr></table></figure>
+
+<p>图像观测可能包括：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">agentview_image</span><br><span class="line">robot0_eye_in_hand_image</span><br></pre></td></tr></table></figure>
+
+<p>训练代码会根据配置决定读取哪些 observation keys。比如只训练低维策略时，可能读取末端位姿、夹爪状态和物体状态；训练视觉策略时，则会读取相机图像和机器人本体状态。</p>
+<h2 id="4-HDF5-在训练流程中的位置"><a href="#4-HDF5-在训练流程中的位置" class="headerlink" title="4. HDF5 在训练流程中的位置"></a>4. HDF5 在训练流程中的位置</h2><p>在离线模仿学习或离线强化学习中，HDF5 文件通常就是训练数据源。完整流程可以理解成：</p>
+<ol>
+<li><strong>收集数据</strong>：人类通过遥操作控制机器人，系统记录每个时刻的观测和动作。</li>
+<li><strong>写入 HDF5</strong>：每条示教轨迹保存成一个 group，例如 <code>data/demo_0</code>。</li>
+<li><strong>建立索引</strong>：Dataset 类读取 HDF5 结构，统计每条轨迹长度、总样本数、训练/验证划分。</li>
+<li><strong>随机采样</strong>：DataLoader 从 HDF5 中采样 batch，可以是单步样本，也可以是连续片段。</li>
+<li><strong>送入模型</strong>：模型根据观测预测动作，并和专家动作计算损失。</li>
+<li><strong>更新参数</strong>：HDF5 本身不参与梯度计算，它只是高效地提供训练样本。</li>
+<li><strong>验证评估</strong>：验证集可以来自同一个文件里的不同轨迹，也可以由 <code>mask/train</code>、<code>mask/valid</code> 之类的索引记录。</li>
+</ol>
+<p>对于行为克隆，训练样本可能是单步形式：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">输入：obs_t</span><br><span class="line">标签：action_t</span><br></pre></td></tr></table></figure>
+
+<p>对于 BC-RNN、Diffusion Policy、ACT 这类需要历史或未来窗口的模型，训练样本通常是连续片段：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">obs[t : t + horizon]</span><br><span class="line">action[t : t + horizon]</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-最重要的规则：时间步对齐"><a href="#5-最重要的规则：时间步对齐" class="headerlink" title="5. 最重要的规则：时间步对齐"></a>5. 最重要的规则：时间步对齐</h2><p>理解机器人 HDF5 数据，最关键的一点是：同一条轨迹内部，不同数组的第一维都按照时间步对齐。</p>
+<p>可以把每个 <code>demo_i</code> 看成一串 transition：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(obs_t, action_t, reward_t, done_t, next_obs_t)</span><br></pre></td></tr></table></figure>
+
+<p>在 HDF5 中，同一个时间步 <code>t</code> 的数据通过第一维索引对齐：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">data/demo_0/actions[t]</span><br><span class="line">data/demo_0/rewards[t]</span><br><span class="line">data/demo_0/dones[t]</span><br><span class="line">data/demo_0/obs/robot0_eef_pos[t]</span><br><span class="line">data/demo_0/obs/agentview_image[t]</span><br><span class="line">data/demo_0/next_obs/robot0_eef_pos[t]</span><br><span class="line">data/demo_0/next_obs/agentview_image[t]</span><br></pre></td></tr></table></figure>
+
+<p>它们共同表示：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">在 obs_t 下执行 action_t</span><br><span class="line">环境返回 reward_t 和 done_t</span><br><span class="line">执行后到达 next_obs_t</span><br></pre></td></tr></table></figure>
+
+<p>也就是说，<code>actions[t]</code> 和 <code>obs[t]</code> 对齐，而不是和 <code>obs[t + 1]</code> 对齐。<code>next_obs[t]</code> 才是执行 <code>actions[t]</code> 后得到的下一帧观测。</p>
+<p>在同一条轨迹内部，通常有：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">next_obs[t] ≈ obs[t + 1]</span><br></pre></td></tr></table></figure>
+
+<p>但很多数据集仍然会显式保存 <code>next_obs[t]</code>，这样离线 RL 或 transition-based 算法可以直接读取完整 transition，不需要训练时再手动错位。</p>
+<p>一个简化时间轴如下：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">t=0: obs[0] --action[0]--&gt; next_obs[0] ≈ obs[1], reward[0], done[0]</span><br><span class="line">t=1: obs[1] --action[1]--&gt; next_obs[1] ≈ obs[2], reward[1], done[1]</span><br><span class="line">t=2: obs[2] --action[2]--&gt; next_obs[2] ≈ obs[3], reward[2], done[2]</span><br></pre></td></tr></table></figure>
+
+<p>因此，在长度为 <code>T</code> 的 demonstration 中，常见 dataset 的第一维长度一般都对齐为 <code>T</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">actions:        [T, action_dim]</span><br><span class="line">rewards:        [T]</span><br><span class="line">dones:          [T]</span><br><span class="line">obs/&lt;key&gt;:      [T, ...]</span><br><span class="line">next_obs/&lt;key&gt;: [T, ...]</span><br></pre></td></tr></table></figure>
+
+<h2 id="6-多模态和序列采样如何保持对齐"><a href="#6-多模态和序列采样如何保持对齐" class="headerlink" title="6. 多模态和序列采样如何保持对齐"></a>6. 多模态和序列采样如何保持对齐</h2><h3 id="6-1-多模态观测"><a href="#6-1-多模态观测" class="headerlink" title="6.1 多模态观测"></a>6.1 多模态观测</h3><p>如果同一时刻有多个观测模态，例如末端位姿、夹爪状态、外部相机和腕部相机，它们也都使用同一个时间索引 <code>t</code>：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">obs/robot0_eef_pos[t]</span><br><span class="line">obs/robot0_gripper_qpos[t]</span><br><span class="line">obs/agentview_image[t]</span><br><span class="line">obs/robot0_eye_in_hand_image[t]</span><br></pre></td></tr></table></figure>
+
+<p>这些数据共同组成模型在时刻 <code>t</code> 看到的 observation。训练代码通常会按 <code>obs_keys</code> 读取它们，并拼成字典或张量结构：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">obs_t = &#123;</span><br><span class="line">  &quot;robot0_eef_pos&quot;: obs/robot0_eef_pos[t],</span><br><span class="line">  &quot;robot0_gripper_qpos&quot;: obs/robot0_gripper_qpos[t],</span><br><span class="line">  &quot;agentview_image&quot;: obs/agentview_image[t],</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如果原始传感器频率不同，HDF5 文件内部通常不会再保存复杂的时间戳对齐逻辑，而是假设写入前已经按照控制频率完成同步或重采样。换句话说，文件里的第 <code>t</code> 行就是第 <code>t</code> 个控制步对应的所有模态。</p>
+<h3 id="6-2-连续片段采样"><a href="#6-2-连续片段采样" class="headerlink" title="6.2 连续片段采样"></a>6.2 连续片段采样</h3><p>对于 BC-RNN、Diffusion Policy、ACT 这类需要连续片段的模型，不仅单步要对齐，整个片段也必须来自同一条 demo 的连续时间段。</p>
+<p>假设从 <code>demo_0</code> 的 <code>t</code> 开始采样长度为 <code>L</code> 的片段：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">obs_seq      = obs[t : t + L]</span><br><span class="line">action_seq   = actions[t : t + L]</span><br><span class="line">next_obs_seq = next_obs[t : t + L]</span><br><span class="line">reward_seq   = rewards[t : t + L]</span><br><span class="line">done_seq     = dones[t : t + L]</span><br></pre></td></tr></table></figure>
+
+<p>那么第 <code>k</code> 个样本仍然满足：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">obs_seq[k] --action_seq[k]--&gt; next_obs_seq[k]</span><br></pre></td></tr></table></figure>
+
+<p>采样器必须避免跨 demo 拼接。不能把 <code>demo_0</code> 的最后几帧和 <code>demo_1</code> 的前几帧连成一个序列，否则模型会看到物理上不连续的假轨迹。</p>
+<h3 id="6-3-Frame-stack-和-padding"><a href="#6-3-Frame-stack-和-padding" class="headerlink" title="6.3 Frame stack 和 padding"></a>6.3 Frame stack 和 padding</h3><p>有些策略会使用历史帧，例如在时刻 <code>t</code> 输入最近 <code>K</code> 帧：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[obs[t - K + 1], ..., obs[t]]</span><br></pre></td></tr></table></figure>
+
+<p>标签通常仍然是当前动作：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">action[t]</span><br></pre></td></tr></table></figure>
+
+<p>这表示模型根据过去一段历史判断当前应该执行什么动作。如果 <code>t</code> 太靠近轨迹开头，历史帧不足，Dataset 可以根据配置做 padding，例如重复第一帧：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">t=0, K=3:</span><br><span class="line">[obs[0], obs[0], obs[0]] -&gt; action[0]</span><br><span class="line"></span><br><span class="line">t=1, K=3:</span><br><span class="line">[obs[0], obs[0], obs[1]] -&gt; action[1]</span><br></pre></td></tr></table></figure>
+
+<p>这种 padding 仍然发生在同一条 demo 内，不应该跨轨迹补帧。</p>
+<h2 id="7-HDF5-对不同算法意味着什么"><a href="#7-HDF5-对不同算法意味着什么" class="headerlink" title="7. HDF5 对不同算法意味着什么"></a>7. HDF5 对不同算法意味着什么</h2><p>不同算法从 HDF5 中读取的数据不完全一样：</p>
+<table>
+<thead>
+<tr>
+<th>算法</th>
+<th>需要的数据</th>
+<th>HDF5 的作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BC</td>
+<td><code>obs_t</code>, <code>action_t</code></td>
+<td>提供监督学习样本，让策略模仿专家动作</td>
+</tr>
+<tr>
+<td>BC-RNN</td>
+<td>连续的 <code>obs</code> 和 <code>action</code> 序列</td>
+<td>保留轨迹顺序，方便采样时间窗口</td>
+</tr>
+<tr>
+<td>Diffusion Policy / ACT</td>
+<td>历史观测、动作序列或动作块</td>
+<td>提供连续片段和多模态观测</td>
+</tr>
+<tr>
+<td>离线 RL</td>
+<td><code>obs_t</code>, <code>action_t</code>, <code>reward_t</code>, <code>next_obs_t</code>, <code>done_t</code></td>
+<td>提供完整 transition，用于 Bellman backup</td>
+</tr>
+</tbody></table>
+<p>以离线 RL 为例，算法可能会用数据估计：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Q(obs_t, action_t) ≈ reward_t + gamma * Q(next_obs_t, next_action)</span><br></pre></td></tr></table></figure>
+
+<p>这里的 <code>obs_t</code>、<code>action_t</code>、<code>reward_t</code>、<code>next_obs_t</code> 和 <code>done_t</code> 都来自 HDF5。算法可以反复利用这些离线数据训练，但不能主动采集新的环境交互数据。</p>
+<h2 id="8-和普通文件夹图片数据集有什么区别"><a href="#8-和普通文件夹图片数据集有什么区别" class="headerlink" title="8. 和普通文件夹图片数据集有什么区别"></a>8. 和普通文件夹图片数据集有什么区别</h2><p>如果不用 HDF5，直观做法可能是用普通文件夹保存：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">demo_0/</span><br><span class="line">  image_0001.png</span><br><span class="line">  image_0002.png</span><br><span class="line">  actions.npy</span><br><span class="line">demo_1/</span><br><span class="line">  image_0001.png</span><br><span class="line">  image_0002.png</span><br><span class="line">  actions.npy</span><br></pre></td></tr></table></figure>
+
+<p>这种方式容易理解，但在大规模训练中会有不少问题：</p>
+<table>
+<thead>
+<tr>
+<th>普通文件夹</th>
+<th>HDF5</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>小文件数量多，文件系统访问压力大</td>
+<td>大量数据集中在一个文件里，管理更方便</td>
+</tr>
+<tr>
+<td>元数据容易散落在多个文件中</td>
+<td>属性和数组可以放在同一个层级结构里</td>
+</tr>
+<tr>
+<td>图像、动作、状态的对齐更容易出错</td>
+<td>通过统一索引维护时间步对齐</td>
+</tr>
+<tr>
+<td>随机读取大量文件时开销较高</td>
+<td>支持对数组做切片读取</td>
+</tr>
+<tr>
+<td>搬运和复现实验时容易漏文件</td>
+<td>单文件或少量文件更容易分发</td>
+</tr>
+</tbody></table>
+<p>所以对于机器人轨迹、科学计算和多模态数组数据，HDF5 往往比“图片文件夹 + 若干 npy 文件”的方式更稳定。</p>
+<h2 id="9-用-h5py-读取一个-HDF5-文件"><a href="#9-用-h5py-读取一个-HDF5-文件" class="headerlink" title="9. 用 h5py 读取一个 HDF5 文件"></a>9. 用 h5py 读取一个 HDF5 文件</h2><p>Python 中最常用的 HDF5 读取库是 <code>h5py</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> h5py</span><br><span class="line"></span><br><span class="line">path = <span class="string">&quot;demo_dataset.hdf5&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> h5py.File(path, <span class="string">&quot;r&quot;</span>) <span class="keyword">as</span> f:</span><br><span class="line">    demo = f[<span class="string">&quot;data&quot;</span>][<span class="string">&quot;demo_0&quot;</span>]</span><br><span class="line"></span><br><span class="line">    actions = demo[<span class="string">&quot;actions&quot;</span>][:]          <span class="comment"># [T, action_dim]</span></span><br><span class="line">    rewards = demo[<span class="string">&quot;rewards&quot;</span>][:]          <span class="comment"># [T]</span></span><br><span class="line">    dones = demo[<span class="string">&quot;dones&quot;</span>][:]              <span class="comment"># [T]</span></span><br><span class="line"></span><br><span class="line">    obs = demo[<span class="string">&quot;obs&quot;</span>]</span><br><span class="line">    eef_pos = obs[<span class="string">&quot;robot0_eef_pos&quot;</span>][:]    <span class="comment"># [T, 3]</span></span><br><span class="line">    image = obs[<span class="string">&quot;agentview_image&quot;</span>][:]     <span class="comment"># [T, H, W, C]</span></span><br></pre></td></tr></table></figure>
+
+<p>如果数据很大，训练时通常不会一次性把所有内容都读进内存，而是按 batch 需要读取切片：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">start = <span class="number">100</span></span><br><span class="line">horizon = <span class="number">16</span></span><br><span class="line"></span><br><span class="line">obs_seq = demo[<span class="string">&quot;obs&quot;</span>][<span class="string">&quot;robot0_eef_pos&quot;</span>][start : start + horizon]</span><br><span class="line">action_seq = demo[<span class="string">&quot;actions&quot;</span>][start : start + horizon]</span><br></pre></td></tr></table></figure>
+
+<p>这也是 HDF5 对训练很友好的地方：文件可以很大，但读取可以很局部。</p>
+<h2 id="10-使用-HDF5-训练时的注意事项"><a href="#10-使用-HDF5-训练时的注意事项" class="headerlink" title="10. 使用 HDF5 训练时的注意事项"></a>10. 使用 HDF5 训练时的注意事项</h2><ol>
+<li><p><strong>不要打乱轨迹边界</strong></p>
+<p>对 RNN、Diffusion Policy、ACT 等序列模型，采样片段不能跨越两个不同 demo。跨轨迹拼接会制造不真实的时间连续性。</p>
+</li>
+<li><p><strong>确认图像维度顺序</strong></p>
+<p>图像可能是 <code>[T, H, W, C]</code>，也可能在训练前被转换成 <code>[T, C, H, W]</code>。读取后要和模型期望的格式一致。</p>
+</li>
+<li><p><strong>重视动作归一化</strong></p>
+<p>机器人动作的不同维度可能有不同量纲。训练前通常需要计算动作均值、标准差或范围，再做 normalization。</p>
+</li>
+<li><p><strong>训练/验证划分最好按轨迹划分</strong></p>
+<p>不建议把同一条轨迹的不同时间步同时放进训练集和验证集，否则验证指标会偏乐观。</p>
+</li>
+<li><p><strong>压缩会节省空间，也会增加解压开销</strong></p>
+<p>图像压缩可以明显减少磁盘占用，但训练时会带来 CPU 解压成本。大规模视觉训练要在空间和读取速度之间权衡。</p>
+</li>
+<li><p><strong>多进程读取要单独打开文件</strong></p>
+<p>PyTorch 多进程 DataLoader 读取 HDF5 时，通常让每个 worker 单独打开文件，避免多个 worker 共享同一个文件句柄。</p>
+</li>
+<li><p><strong>元数据要写清楚</strong></p>
+<p>环境名称、控制频率、动作空间、相机参数、数据采集方式等信息，最好通过 attributes 或单独的 metadata 保存下来。否则数据集过一段时间后会很难复现。</p>
+</li>
+</ol>
+<h2 id="11-总结"><a href="#11-总结" class="headerlink" title="11. 总结"></a>11. 总结</h2><p>HDF5 的核心价值不是“高级”，而是“适合”：它适合保存大规模数组，适合表达层级结构，适合按切片随机读取，也适合把轨迹数据和元数据放在同一个文件体系里。</p>
+<p>放到机器人学习里看，HDF5 就是离线经验池或示教库：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">人类遥操作机器人</span><br><span class="line">        ↓</span><br><span class="line">记录轨迹数据</span><br><span class="line">        ↓</span><br><span class="line">保存为 HDF5 文件</span><br><span class="line">        ↓</span><br><span class="line">DataLoader 读取 batch</span><br><span class="line">        ↓</span><br><span class="line">BC / BC-RNN / Diffusion Policy / ACT / 离线 RL 训练</span><br><span class="line">        ↓</span><br><span class="line">得到机器人控制策略</span><br></pre></td></tr></table></figure>
+
+<p>如果只记住一句话，可以这样理解：</p>
+<blockquote>
+<p>HDF5 不是模型，也不是算法；它是把机器人示教轨迹高效、结构化、可随机访问地保存起来的数据容器。</p>
+</blockquote>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">Mitlsl</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://example.com/2026/06/03/HDF5%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E8%AF%A6%E8%A7%A3/">http://example.com/2026/06/03/HDF5%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E8%AF%A6%E8%A7%A3/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://example.com" target="_blank">Mitlsl</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Embodied-AI/">Embodied AI</a><a class="post-meta__tags" href="/tags/HDF5/">HDF5</a><a class="post-meta__tags" href="/tags/Robot-Learning/">Robot Learning</a></div><div class="post_share"><div class="social-share" data-image="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2025/01/06/HexoPictureSetting/"><img class="next-cover" src="/img/Every_OK.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Hexo图片的插入设置</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/deadpool.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Mitlsl</div><div class="author-info__description"></div></div><div class="card-info-data is-center"><div class="card-info-data-item"><a href="/archives/"><div class="headline">文章</div><div class="length-num">7</div></a></div><div class="card-info-data-item"><a href="/tags/"><div class="headline">标签</div><div class="length-num">7</div></a></div><div class="card-info-data-item"><a href="/categories/"><div class="headline">分类</div><div class="length-num">9</div></a></div></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/MiTLSL"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">寒灯纸上梨花雨落，我等风雪又一年</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#HDF5-%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E8%AF%A6%E8%A7%A3%EF%BC%9A%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%AD%A6%E4%B9%A0%E9%87%8C%E7%9A%84%E7%A4%BA%E6%95%99%E6%95%B0%E6%8D%AE%E5%AE%B9%E5%99%A8"><span class="toc-number">1.</span> <span class="toc-text">HDF5 数据格式详解：机器人学习里的示教数据容器</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-HDF5-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.1.</span> <span class="toc-text">1. HDF5 是什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E4%B8%BA%E4%BB%80%E4%B9%88%E6%9C%BA%E5%99%A8%E4%BA%BA%E5%AD%A6%E4%B9%A0%E5%96%9C%E6%AC%A2%E7%94%A8-HDF5"><span class="toc-number">1.2.</span> <span class="toc-text">2. 为什么机器人学习喜欢用 HDF5</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%85%B8%E5%9E%8B-robomimic-%E6%95%B0%E6%8D%AE%E9%9B%86%E7%BB%93%E6%9E%84"><span class="toc-number">1.3.</span> <span class="toc-text">3. 典型 robomimic 数据集结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-HDF5-%E5%9C%A8%E8%AE%AD%E7%BB%83%E6%B5%81%E7%A8%8B%E4%B8%AD%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="toc-number">1.4.</span> <span class="toc-text">4. HDF5 在训练流程中的位置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E8%A7%84%E5%88%99%EF%BC%9A%E6%97%B6%E9%97%B4%E6%AD%A5%E5%AF%B9%E9%BD%90"><span class="toc-number">1.5.</span> <span class="toc-text">5. 最重要的规则：时间步对齐</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-%E5%A4%9A%E6%A8%A1%E6%80%81%E5%92%8C%E5%BA%8F%E5%88%97%E9%87%87%E6%A0%B7%E5%A6%82%E4%BD%95%E4%BF%9D%E6%8C%81%E5%AF%B9%E9%BD%90"><span class="toc-number">1.6.</span> <span class="toc-text">6. 多模态和序列采样如何保持对齐</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#6-1-%E5%A4%9A%E6%A8%A1%E6%80%81%E8%A7%82%E6%B5%8B"><span class="toc-number">1.6.1.</span> <span class="toc-text">6.1 多模态观测</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-2-%E8%BF%9E%E7%BB%AD%E7%89%87%E6%AE%B5%E9%87%87%E6%A0%B7"><span class="toc-number">1.6.2.</span> <span class="toc-text">6.2 连续片段采样</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-3-Frame-stack-%E5%92%8C-padding"><span class="toc-number">1.6.3.</span> <span class="toc-text">6.3 Frame stack 和 padding</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#7-HDF5-%E5%AF%B9%E4%B8%8D%E5%90%8C%E7%AE%97%E6%B3%95%E6%84%8F%E5%91%B3%E7%9D%80%E4%BB%80%E4%B9%88"><span class="toc-number">1.7.</span> <span class="toc-text">7. HDF5 对不同算法意味着什么</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#8-%E5%92%8C%E6%99%AE%E9%80%9A%E6%96%87%E4%BB%B6%E5%A4%B9%E5%9B%BE%E7%89%87%E6%95%B0%E6%8D%AE%E9%9B%86%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="toc-number">1.8.</span> <span class="toc-text">8. 和普通文件夹图片数据集有什么区别</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#9-%E7%94%A8-h5py-%E8%AF%BB%E5%8F%96%E4%B8%80%E4%B8%AA-HDF5-%E6%96%87%E4%BB%B6"><span class="toc-number">1.9.</span> <span class="toc-text">9. 用 h5py 读取一个 HDF5 文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#10-%E4%BD%BF%E7%94%A8-HDF5-%E8%AE%AD%E7%BB%83%E6%97%B6%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-number">1.10.</span> <span class="toc-text">10. 使用 HDF5 训练时的注意事项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#11-%E6%80%BB%E7%BB%93"><span class="toc-number">1.11.</span> <span class="toc-text">11. 总结</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2026/06/03/HDF5%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E8%AF%A6%E8%A7%A3/" title="HDF5数据格式详解"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="HDF5数据格式详解"/></a><div class="content"><a class="title" href="/2026/06/03/HDF5%E6%95%B0%E6%8D%AE%E6%A0%BC%E5%BC%8F%E8%AF%A6%E8%A7%A3/" title="HDF5数据格式详解">HDF5数据格式详解</a><time datetime="2026-06-03T07:34:59.000Z" title="发表于 2026-06-03 15:34:59">2026-06-03</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/01/06/HexoPictureSetting/" title="Hexo图片的插入设置"><img src="/img/Every_OK.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hexo图片的插入设置"/></a><div class="content"><a class="title" href="/2025/01/06/HexoPictureSetting/" title="Hexo图片的插入设置">Hexo图片的插入设置</a><time datetime="2025-01-06T01:38:40.000Z" title="发表于 2025-01-06 09:38:40">2025-01-06</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/12/27/Linear-Algebra/" title="Linear Algebra"><img src="/img/Linear-Algebra/LinearAlgebra.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Linear Algebra"/></a><div class="content"><a class="title" href="/2024/12/27/Linear-Algebra/" title="Linear Algebra">Linear Algebra</a><time datetime="2024-12-27T13:49:52.000Z" title="发表于 2024-12-27 21:49:52">2024-12-27</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/12/26/DeleteElement/" title="DeleteElement"><img src="/img/DeleteElement.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="DeleteElement"/></a><div class="content"><a class="title" href="/2024/12/26/DeleteElement/" title="DeleteElement">DeleteElement</a><time datetime="2024-12-26T04:01:40.000Z" title="发表于 2024-12-26 12:01:40">2024-12-26</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/12/24/BinarySearch/" title="BinarySearch"><img src="/img/BinarySearch.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="BinarySearch"/></a><div class="content"><a class="title" href="/2024/12/24/BinarySearch/" title="BinarySearch">BinarySearch</a><time datetime="2024-12-24T07:28:28.000Z" title="发表于 2024-12-24 15:28:28">2024-12-24</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2026 By Mitlsl</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to my <a target="_blank" rel="noopener" href="https://mitlsl.github.io/">blog!</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="chat_btn" type="button" title="聊天"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.js"></script><script>var preloader = {
+  endLoading: () => {
+    document.body.style.overflow = 'auto';
+    document.getElementById('loading-box').classList.add("loaded")
+  },
+  initLoading: () => {
+    document.body.style.overflow = '';
+    document.getElementById('loading-box').classList.remove("loaded")
+
+  }
+}
+window.addEventListener('load',preloader.endLoading())</script><div class="js-pjax"></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc@1/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="true"></script><script>(function(d, w, c) {
+    w.ChatraID = 'XG5BLG6h4yoLsADQ4';
+    var s = d.createElement('script');
+    w[c] = w[c] || function() {
+        (w[c].q = w[c].q || []).push(arguments);
+    };
+    s.async = true;
+    s.src = 'https://call.chatra.io/chatra.js';
+    if (d.head) d.head.appendChild(s);
+})(document, window, 'Chatra');
+
+if (true) {
+  var chatBtnFn = () => {
+    var chatBtn = document.getElementById("chat_btn")
+    chatBtn.addEventListener("click", function(){
+      Chatra('openChat')
+    });
+  }
+  chatBtnFn()
+} else {
+  if (true) {
+    function chatBtnHide () {
+      Chatra('hide')
+    }
+    function chatBtnShow () {
+      Chatra('show')
+    }
+  }
+}</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
